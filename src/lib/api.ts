@@ -1,7 +1,14 @@
 import "dayjs/locale/ja"
 
+
 import fetch from "node-fetch"
-import day from "dayjs"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 
 type LatLon = {
   lat: string,
@@ -11,7 +18,7 @@ const openWeatherUrl = ({ lat, lon }: LatLon) => {
   return `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${process.env.OPEN_WEATHER_API_KEY}&lang=ja_jp&units=metric`
 }
 
-const now = day().set("minutes", 0).set("second", 0)
+const now = dayjs().set("minutes", 0).set("second", 0)
 
 const after6h = now.clone().add(6, "hours").unix()
 const after12h = now.clone().add(12, "hours").unix()
@@ -42,7 +49,8 @@ const weatherIconToEmoji = (weatherMain: any) => {
 }
 
 const generateMessage = (target, enableNortify = false) => {
-  const time = day(target.dt * 1000)
+  const time = dayjs(target.dt * 1000)
+    .tz("Asia/Tokyo")
     .locale("ja")
     .format("MM月DD日 HH時頃")
   const icon = weatherIconToEmoji(target?.weather?.[0])
